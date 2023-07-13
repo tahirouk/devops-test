@@ -1,0 +1,33 @@
+# Use the CentOS base image
+FROM centos:7
+
+# Set environment variables
+ENV POSTGRES_USER postgres
+ENV POSTGRES_PASSWORD postgres
+ENV POSTGRES_DB mydatabase
+
+# Install PostgreSQL and dependencies
+RUN yum update -y && \
+    yum install -y postgresql-server postgresql-contrib
+
+# Install build tools
+RUN yum install -y gcc make
+
+# Download and extract pgvector source code
+RUN curl -LO https://github.com/timescale/pgvector/archive/refs/tags/1.0.0.tar.gz && \
+    tar xvf 1.0.0.tar.gz
+
+# Build and install pgvector
+RUN cd pgvector-1.0.0 && \
+    make && \
+    make install
+
+# Initialize the PostgreSQL database
+RUN postgresql-setup initdb
+
+# Start the PostgreSQL service
+CMD ["postgres"]
+
+# Expose the default PostgreSQL port
+EXPOSE 5432
+
